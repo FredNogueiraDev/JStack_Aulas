@@ -4,15 +4,25 @@ const { URL } = require('url');
 
 const server = http.createServer((req, res) => {
     const parsedUrl = new URL(`http://localhost:3000${req.url}`)
-
     console.log(`Request Method: ${req.method} | Request Endpoint: ${parsedUrl.pathname}`)
 
+    let { pathname } = parsedUrl;
+    let id = null;
+
+    const splitEndPoint = pathname.split("/").filter(Boolean);
+
+    if (splitEndPoint.length > 1){
+        pathname = `/${splitEndPoint[0]}/:id`;
+        id = splitEndPoint[1];
+    }
+
     const route = routes.find((routeObj) => (
-        routeObj.endpoint === parsedUrl.pathname && routeObj.method === req.method
+        routeObj.endpoint === pathname && routeObj.method === req.method
     ));
 
     if (route) {
         req.query = Object.fromEntries(parsedUrl.searchParams);
+        req.params = { id };
 
         route.handler(req, res);
     } else {
