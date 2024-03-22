@@ -1,6 +1,7 @@
 const http = require("http");
-const routes = require('./routes');
-const { URL } = require('url');
+const routes = require("./routes");
+const { URL } = require("url");
+const bodyParser = require("./helpers/bodyParser")
 
 const server = http.createServer((req, res) => {
     const parsedUrl = new URL(`http://localhost:3000${req.url}`)
@@ -27,6 +28,11 @@ const server = http.createServer((req, res) => {
         res.send = (statusCode, body) => {
             res.writeHead(statusCode, {'Content-Type' : 'text/html'});
             res.end(JSON.stringify(body));
+        }
+
+        if (['POST','PUT', 'PATCH'].includes(req.method)) {
+            bodyParser(req, () => route.handler(req, res));
+            return
         }
 
         route.handler(req, res);
